@@ -1,5 +1,4 @@
-import os
-import sys
+from typing import Union
 import numpy as np
 import torch
 from torchvision import models
@@ -38,8 +37,10 @@ class L2pooling(nn.Module):
 
 class DISTS(torch.nn.Module):
 
-    def __init__(self, load_weights: bool = True):
+    def __init__(self, load_weights: bool = True, use_pooling: bool = False):
         super(DISTS, self).__init__()
+
+        self.use_pooling = use_pooling
 
         vgg_pretrained_features = models.vgg16(pretrained=True).features
         self.stage1 = torch.nn.Sequential()
@@ -79,7 +80,7 @@ class DISTS(torch.nn.Module):
         self.beta.data.normal_(0.1, 0.01) # type: ignore
 
         if load_weights:
-            weights = torch.load(os.path.join(sys.prefix,'weights.pt'))
+            weights = torch.load('weights.pt')
             self.alpha.data = weights['alpha']
             self.beta.data = weights['beta']
 
@@ -105,7 +106,7 @@ class DISTS(torch.nn.Module):
         pair_projections: PairProjections,
         require_grad: bool = False,
         batch_average: bool = False
-    ) -> float:
+    ) -> Union[float, list[float]]:
         view_scores = []
         for view_ref, view_deg in zip(pair_projections.ref, pair_projections.deg):
             if require_grad:
@@ -142,6 +143,8 @@ class DISTS(torch.nn.Module):
                 view_scores.append(score.mean())
             else:
                 view_scores.append(score)
-                
-        final_score = sum(view_scores)/len(view_scores)
-        return final_score  
+
+        if self.use_pooling:
+            final_score = sum(view_scores)/len(view_scores)
+            return final_score     
+        return view_scores

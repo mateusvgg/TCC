@@ -2,11 +2,11 @@ import os
 import pandas as pd
 from tqdm import tqdm
 
-from projections_genetaror import gen_projections
+from gen_projections_from_ply import gen_projections
 
 
-projections_ref_path = r'D:\Arquivos\Desktop\APSIPA___M-PCCD\ref_projections'
-projections_deg_path = r'D:\Arquivos\Desktop\APSIPA___M-PCCD\deg_projections'
+projections_ref_path = r'/mnt/d/Arquivos/Desktop/APSIPA___M-PCCD/ref_projections'
+projections_deg_path = r'/mnt/d/Arquivos/Desktop/APSIPA___M-PCCD/deg_projections'
 
 df_paths = pd.read_csv('apsipa.csv')
 

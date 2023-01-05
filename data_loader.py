@@ -4,14 +4,27 @@ from tqdm import tqdm
 import torch
 from torchvision import transforms
 from PIL import Image
-from typing import Dict, List
+from typing import Dict, List, Generator
 
 from projections_dataclasses import PlyProjections, PairProjections
 
 
-def prepare_image(image_path: str, resize: bool = True) -> torch.Tensor:
+def prepare_ref_image(
+    image_path: str,
+    resize: bool = True
+) -> tuple[torch.Tensor, tuple[int, int]]:
     image = Image.open(image_path).convert("RGB")
+    original_size = image.size
     if resize and (min(image.size) > 256):
+        image = transforms.functional.resize(image, 256) # type: ignore
+    image = transforms.ToTensor()(image)  
+    return image.unsqueeze(0), original_size
+
+
+def prepare_deg_image(image_path: str, new_size: tuple[int, int]) -> torch.Tensor:
+    image = Image.open(image_path).convert("RGB")
+    image = image.resize(new_size)
+    if min(image.size) > 256:
         image = transforms.functional.resize(image, 256) # type: ignore
     image = transforms.ToTensor()(image)  
     return image.unsqueeze(0)
@@ -49,7 +62,7 @@ class LoadProjectionsData:
         return projs
 
 
-    def _get_refs_projections(self) -> Dict[str, PlyProjections]:
+    def _get_refs_projections(self) -> Dict[str, tuple[PlyProjections, tuple[int, int]]]:
         ''' From the dataset with the data mapping in disk, generate 
         the PlyProjections for every reference PC. '''
 
@@ -58,15 +71,17 @@ class LoadProjectionsData:
         for ref_ in refs_names:
             ref_name = ref_.replace(".ply", '')
             views_paths = self._gen_views_paths(ref_name, self.ref_base)
-            refs_projections_aux = [prepare_image(view_path) for view_path in views_paths]
+            ref_images = [prepare_ref_image(view_path) for view_path in views_paths]
+            refs_projections_aux = [ref_image[0] for ref_image in ref_images]
+            sizes = [ref_image[1] for ref_image in ref_images]
             projs = self._gen_projections_obj(ref_name, refs_projections_aux)
-            refs_projections[ref_name] = projs
+            refs_projections[ref_name] = (projs, sizes)
         return refs_projections
 
 
     def _get_pairs_projections(
         self,
-        refs_projections: Dict[str, PlyProjections]
+        refs_projections: Dict[str, tuple[PlyProjections, tuple[int, int]]]
     ) -> List[PairProjections]:
         
         projections = []
@@ -76,15 +91,44 @@ class LoadProjectionsData:
 
             views_paths = self._gen_views_paths(deg_name, self.deg_base)
 
-            degs_projections_aux = [prepare_image(view_path) for view_path in views_paths]
+            ref_shapes = [shape for shape in refs_projections[ref_name][1]]
+            degs_projections_aux = [
+                prepare_deg_image(view_path, ref_shape) # type: ignore
+                for view_path, ref_shape in zip(views_paths, ref_shapes)
+            ]
+
             projs = self._gen_projections_obj(deg_name, degs_projections_aux)
             projs_pair = PairProjections(
-                ref=refs_projections[ref_name],
+                ref=refs_projections[ref_name][0],
                 deg=projs,
                 score=row['SCORE']
             )
             projections.append(projs_pair)
         return projections
+
+    
+    def data_generator(self) -> Generator[PairProjections, None, None]:
+        refs_projections = self._get_refs_projections()
+
+        for _, row in self.df_data.iterrows():
+            ref_name = row['REF'].replace(".ply", '').strip()
+            deg_name = row['SIGNAL'].replace(".ply", '').strip()
+
+            views_paths = self._gen_views_paths(deg_name, self.deg_base)
+
+            ref_shapes = [shape for shape in refs_projections[ref_name][1]]
+            degs_projections_aux = [
+                prepare_deg_image(view_path, ref_shape) # type: ignore
+                for view_path, ref_shape in zip(views_paths, ref_shapes)
+            ]
+
+            projs = self._gen_projections_obj(deg_name, degs_projections_aux)
+            projs_pair = PairProjections(
+                ref=refs_projections[ref_name][0],
+                deg=projs,
+                score=row['SCORE']
+            )
+            yield projs_pair
 
     
     def prepare_data(self) -> List[PairProjections]:
