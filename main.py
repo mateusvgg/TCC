@@ -1,3 +1,4 @@
+import torch
 import pandas as pd
 from tqdm import tqdm
 
@@ -5,9 +6,9 @@ from data_loader import LoadProjectionsData
 from model import DISTS
 
 
-REF_BASE = r'/mnt/d/Arquivos/Desktop/APSIPA___M-PCCD/ref_projections'
-DEG_BASE = r'/mnt/d/Arquivos/Desktop/APSIPA___M-PCCD/deg_projections'
-DF_DATA_PATH = r'/mnt/d/Arquivos/Desktop/APSIPA___M-PCCD/apsipa_wsl.csv'
+REF_BASE = r'./APSIPA_projections/ref_projections/'
+DEG_BASE = r'./APSIPA_projections/deg_projections/'
+DF_DATA_PATH = r'./apsipa.csv'
 
 
 def get_projections_data():
@@ -33,7 +34,7 @@ def forward_test():
 
 def gen_x_and_y() -> tuple[list[list[float]], list[float]]:
     df_data = pd.read_csv(DF_DATA_PATH)
-    
+
     generator = LoadProjectionsData(
         ref_base=REF_BASE,
         deg_base=DEG_BASE,
