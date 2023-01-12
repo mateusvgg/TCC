@@ -14,10 +14,11 @@ class PlyProjections:
 
     def __iter__(self):
         views = [self.view0, self.view1, self.view2, self.view3, self.view4, self.view5]
+        device = torch.device("mps") if torch.backends.mps.is_available() else "cpu"
         for view in views:
-            yield view
-        
-        
+            yield view.to(device)
+
+
 @dataclass
 class PairProjections:
     ref: PlyProjections
