@@ -41,8 +41,12 @@ def gen_x_and_y() -> tuple[list[list[float]], list[float]]:
     )
 
     model = DISTS()
+    device = torch.device(
+        "mps") if torch.backends.mps.is_available() else torch.device("cpu")
+    model.to(device)
+    print(f"model is using {device}")
     data_gen = generator.data_generator()
-    
+
     X, y = [], []
     for pair_proj in data_gen:
         X.append(model(pair_proj))

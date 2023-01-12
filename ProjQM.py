@@ -259,17 +259,21 @@ Input1: Output image file name
 Input2: Image
 Output: status of the writting procedure
 '''
+
+
 def save_images(fn, image):
-    status = cv2.imwrite(fn,image)
+    status = cv2.imwrite(fn, image)
     return status
 
 
 def compute_dists(original, decoded):
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device('mps' if torch.backends.mps.is_available() else 'cpu')
     ref = prepare_image(original).to(device)
     dist = prepare_image(decoded).to(device)
     q_metric = DISTS().to(device)
     return q_metric(dist, ref, as_loss=False).item()
+
 
 def compute_haarpsi(original, decoded):
     from piq import haarpsi
@@ -279,55 +283,69 @@ def compute_haarpsi(original, decoded):
     HaarPSI: torch.Tensor = haarpsi(ref, dist)
     return HaarPSI.item()
 
+
 def compute_hvspsnr(original, decoded):
     import psnr_hvs_m
-    p = psnr_hvs_m.psnrhvsm(original,decoded)
+    p = psnr_hvs_m.psnrhvsm(original, decoded)
     return p
-    
+
+
 def compute_vifp(original, decoded):
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device('mps' if torch.backends.mps.is_available() else 'cpu')
     ref = prepare_image(original).to(device)
     dist = prepare_image(decoded).to(device)
     q_metric = VIFs(channels=1).to(device)
     return q_metric(dist, ref, as_loss=False).item()
 
+
 def compute_ssim(original, decoded):
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device('mps' if torch.backends.mps.is_available() else 'cpu')
     ref = prepare_image(original).to(device)
     dist = prepare_image(decoded).to(device)
     q_metric = SSIM(channels=1).to(device)
     return q_metric(dist, ref, as_loss=False).item()
 
+
 def compute_msssim(original, decoded):
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device('mps' if torch.backends.mps.is_available() else 'cpu')
     ref = prepare_image(original).to(device)
     dist = prepare_image(decoded).to(device)
     q_metric = MS_SSIM(channels=1).to(device)
     return q_metric(dist, ref, as_loss=False).item()
 
+
 def compute_fsim(original, decoded):
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device('mps' if torch.backends.mps.is_available() else 'cpu')
     ref = prepare_image(original).to(device)
     dist = prepare_image(decoded).to(device)
     q_metric = FSIM(channels=1).to(device)
     return q_metric(dist, ref, as_loss=False).item()
 
+
 def compute_vsi(original, decoded):
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device('mps' if torch.backends.mps.is_available() else 'cpu')
     ref = prepare_image(original).to(device)
     dist = prepare_image(decoded).to(device)
     q_metric = VSI().to(device)
     return q_metric(dist, ref, as_loss=False).item()
 
+
 def compute_lpips(original, decoded):
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device('mps' if torch.backends.mps.is_available() else 'cpu')
     ref = prepare_image(original).to(device)
     dist = prepare_image(decoded).to(device)
     q_metric = LPIPSvgg().to(device)
     return q_metric(dist, ref, as_loss=False).item()
 
+
 def compute_psnr(original, decoded):
-    mse = np.mean( (original - decoded) ** 2 )
+    mse = np.mean((original - decoded) ** 2)
     if mse == 0:
         return 100
     PIXEL_MAX = 255.0
