@@ -55,5 +55,7 @@ def gen_x_and_y() -> tuple[list[list[float]], list[float]]:
     return X, y
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     X, y = gen_x_and_y()
+    torch.save(X, 'X_tensor.pt')
+    torch.save(y, 'y_tensor.pt')
