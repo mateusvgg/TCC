@@ -6,7 +6,7 @@ from torchvision import transforms
 from PIL import Image
 from typing import Dict, List, Generator
 
-from projections_dataclasses import PlyProjections, PairProjections
+from src.projections_dataclasses import PlyProjections, PairProjections
 
 
 def prepare_ref_image(

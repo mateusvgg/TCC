@@ -2,8 +2,8 @@ import torch
 import pandas as pd
 from tqdm import tqdm
 
-from data_loader import LoadProjectionsData
-from model import DISTS
+from src.data_loader import LoadProjectionsData
+from src.model import DISTS
 
 
 REF_BASE = r'./APSIPA_projections/ref_projections/'
