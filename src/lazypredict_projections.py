@@ -27,8 +27,8 @@ def fit_regressor_calculate_correlation(regressor, corr_function, x_train, x_tes
     return corr_function(y_pred, y_test)
 
 
-X = torch.load('X_tensor_cpu.pt')
-y = torch.load('y_tensor.pt')
+X = torch.load('data/X_tensor_cpu.pt')
+y = torch.load('data/y_tensor.pt')
 
 for i in range(len(X)):
     for j in range(len(X[i])):
@@ -59,12 +59,15 @@ for regressor in REGRESSORS:
     PEARSON_CORRELATIONS.append((regressor.__name__, fit_regressor_calculate_correlation(
         regressor(), scipy.stats.pearsonr, X_train, X_test, y_train, y_test)[0]))
 
-print(sorted(PEARSON_CORRELATIONS, key=lambda x: -x[1]))
 
 SPEARMAN_CORRELATIONS = []
 
 for regressor in REGRESSORS:
     SPEARMAN_CORRELATIONS.append((regressor.__name__, fit_regressor_calculate_correlation(
-        regressor(), scipy.stats.spearmanr, X_train, X_test, y_train, y_test)))
+        regressor(), scipy.stats.spearmanr, X_train, X_test, y_train, y_test)[0]))
 
-print(sorted(SPEARMAN_CORRELATIONS, key=lambda x: -x[0]))
+print("PEARSON CORRELATIONS:")
+print(sorted(PEARSON_CORRELATIONS, key=lambda x: -x[1]))
+
+print("SPEARMAN CORRELATIONS:")
+print(sorted(SPEARMAN_CORRELATIONS, key=lambda x: -x[1]))
