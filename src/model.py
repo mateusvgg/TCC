@@ -5,7 +5,7 @@ from torchvision import models
 import torch.nn as nn
 import torch.nn.functional as F
 
-from projections_dataclasses import PairProjections
+from src.projections_dataclasses import PairProjections
 
 
 class L2pooling(nn.Module):
@@ -88,7 +88,7 @@ class DISTS(torch.nn.Module):
         self.beta.data.normal_(0.1, 0.01)  # type: ignore
 
         if load_weights:
-            weights = torch.load('weights.pt')
+            weights = torch.load('data/weights.pt')
             self.alpha.data = weights['alpha']
             self.beta.data = weights['beta']
 
