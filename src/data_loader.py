@@ -37,6 +37,7 @@ class LoadProjectionsData:
         self.deg_base = deg_base
         self.df_data = df_data
 
+
     def _gen_views_paths(self, pc_name: str, base_path: str) -> List[str]:
         ''' From a PC name, generate the paths of the 6 views. '''
 
@@ -45,6 +46,7 @@ class LoadProjectionsData:
             os.path.join(*[base_path, view_name]) for view_name in views_names
         ]
         return views_paths
+
 
     def _gen_projections_obj(self, pc_name: str, projections: List[torch.Tensor]) -> PlyProjections:
         projs = PlyProjections(
@@ -57,6 +59,7 @@ class LoadProjectionsData:
             view5=projections[5]
         )
         return projs
+
 
     def _get_refs_projections(self) -> Dict[str, tuple[PlyProjections, tuple[int, int]]]:
         ''' From the dataset with the data mapping in disk, generate 
@@ -75,11 +78,11 @@ class LoadProjectionsData:
             refs_projections[ref_name] = (projs, sizes)
         return refs_projections
 
+
     def _get_pairs_projections(
         self,
         refs_projections: Dict[str, tuple[PlyProjections, tuple[int, int]]]
     ) -> List[PairProjections]:
-
         projections = []
         for _, row in tqdm(self.df_data.iterrows()):
             ref_name = row['REF'].replace(".ply", '').strip()
@@ -101,6 +104,7 @@ class LoadProjectionsData:
             )
             projections.append(projs_pair)
         return projections
+
 
     def data_generator(self) -> Generator[PairProjections, None, None]:
         refs_projections = self._get_refs_projections()
@@ -124,6 +128,7 @@ class LoadProjectionsData:
                 score=row['SCORE']
             )
             yield projs_pair
+
 
     def prepare_data(self) -> List[PairProjections]:
         refs_projections = self._get_refs_projections()
