@@ -9,9 +9,9 @@ from src.model import DISTS
 
 DBS_METADATA = {
     'APSIPA': {
-        'ref_base': '/mnt/d/Arquivos/Desktop/APSIPA___M-PCCD/ref_projections/',
-        'deg_base': '/mnt/d/Arquivos/Desktop/APSIPA___M-PCCD/deg_projections/',
-        'df_path': '/mnt/d/Arquivos/Desktop/APSIPA___M-PCCD/APSIPA.csv'
+        'ref_base': '/Volumes/mnt/APSIPA_projections/ref_projections/',
+        'deg_base': '/Volumes/mnt/APSIPA_projections/deg_projections/',
+        'df_path': '/Volumes/mnt/APSIPA_projections/APSIPA.csv'
     },
     'WPC': {
         'ref_base': r'./wpc_projections/ref_projections/',
@@ -34,7 +34,7 @@ def gen_x_and_y(
     )
 
     device = torch.device(
-        "mps") if torch.backends.mps.is_available() else torch.device("cpu") # type: ignore
+        "mps") if torch.backends.mps.is_available() else torch.device("cpu")  # type: ignore
     model.to(device)
     print(f"model is using {device}")
     data_gen = generator.data_generator()

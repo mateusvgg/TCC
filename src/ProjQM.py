@@ -13,6 +13,7 @@ from IQA_pytorch import VIFs, SSIM, MS_SSIM, FSIM, VSI, LPIPSvgg, DISTS
 from IQA_pytorch.utils import prepare_image
 import torch
 import math
+import logging
 
 '''
 A function to read the configuration file
@@ -156,6 +157,9 @@ Output: two recolored point clouds
 def orthographic_projection(cloud, precision, filtering):
 
     geometry = np.asarray(cloud.points)
+    if np.any(cloud.get_min_bound() < 0):
+        logging.info(f'Point Cloud {cloud} has negative points')
+        geometry = geometry - cloud.get_min_bound()
     if cloud.has_colors():
         color = np.asarray(cloud.colors)
 
