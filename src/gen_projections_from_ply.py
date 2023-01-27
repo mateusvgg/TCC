@@ -16,4 +16,6 @@ def gen_projections(path_to_pc: str, path_to_save: str) -> None:
         ImR_cropped, OMR_cropped = ProjQM.cropp_images(ImR_curr, OMR_curr)
 
         ImR_padded = ProjQM.pad_images(ImR_cropped, OMR_cropped)
-        ProjQM.save_images(f'{path_to_save}_view_{i}.bmp', cv2.cvtColor(ImR_padded, cv2.COLOR_BGR2RGB))
+        print(f'saving projection in {path_to_save}_view_{i}.bmp')
+        ProjQM.save_images(f'{path_to_save}_view_{i}.bmp',
+                           cv2.cvtColor(ImR_padded, cv2.COLOR_BGR2RGB))
