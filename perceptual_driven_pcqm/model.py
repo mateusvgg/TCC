@@ -5,7 +5,7 @@ from torchvision import models
 import torch.nn as nn
 import torch.nn.functional as F
 
-from src.projections_dataclasses import PairProjections
+from perceptual_driven_pcqm.projections_dataclasses import PairProjections
 
 
 class L2pooling(nn.Module):
@@ -41,7 +41,9 @@ class DISTS(torch.nn.Module):
 
         self.use_pooling = use_pooling
 
-        vgg_pretrained_features = models.vgg16(weights=models.VGG16_Weights.DEFAULT).features
+        vgg_pretrained_features = models.vgg16(
+            weights=models.VGG16_Weights.DEFAULT
+        ).features
         self.stage1 = torch.nn.Sequential()
         self.stage2 = torch.nn.Sequential()
         self.stage3 = torch.nn.Sequential()
@@ -113,8 +115,11 @@ class DISTS(torch.nn.Module):
         require_grad: bool = False,
         batch_average: bool = False
     ) -> Union[float, list[float]]:
+
         view_scores = []
-        for view_ref, view_deg in zip(pair_projections.ref, pair_projections.deg):
+        view_pairs = zip(pair_projections.ref, pair_projections.deg)
+
+        for view_ref, view_deg in view_pairs:
             if require_grad:
                 feats0 = self.forward_once(view_ref)
                 feats1 = self.forward_once(view_deg)
@@ -131,7 +136,8 @@ class DISTS(torch.nn.Module):
             alpha = torch.split(self.alpha/w_sum, self.chns, dim=1)
             beta = torch.split(self.beta/w_sum, self.chns, dim=1)
             for k in range(len(self.chns)):
-                # feats0[k] has shape (1, num_filters, feat_map.shape[0], feat_map.shape[1])
+                # feats0[k] has shape
+                # (1, num_filters, feat_map.shape[0], feat_map.shape[1])
 
                 # shape = [1, num_filters, 1, 1]
                 x_mean = feats0[k].mean([2, 3], keepdim=True)
@@ -148,7 +154,8 @@ class DISTS(torch.nn.Module):
                 y_var = ((feats1[k]-y_mean)**2).mean([2, 3], keepdim=True)
                 # shape = [1, num_filters, 1, 1]
                 xy_cov = (feats0[k]*feats1[k]).mean([2, 3],
-                                                    keepdim=True) - x_mean*y_mean
+                                                    keepdim=True
+                                                    ) - x_mean*y_mean
                 # shape = [1, num_filters, 1, 1]
                 S2 = (2*xy_cov+c2)/(x_var+y_var+c2)
                 # shape = [1, 1, 1, 1]

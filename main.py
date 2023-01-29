@@ -3,8 +3,8 @@ import pandas as pd
 from tqdm import tqdm
 import joblib
 
-from src.data_loader import LoadProjectionsData
-from src.model import DISTS
+from perceptual_driven_pcqm.data_loader import LoadProjectionsData
+from perceptual_driven_pcqm.model import DISTS
 
 
 DBS_METADATA = {

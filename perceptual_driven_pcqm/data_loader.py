@@ -6,7 +6,10 @@ from torchvision import transforms
 from PIL import Image
 from typing import Dict, List, Generator
 
-from src.projections_dataclasses import PlyProjections, PairProjections
+from perceptual_driven_pcqm.projections_dataclasses import (
+    PlyProjections,
+    PairProjections
+)
 
 
 def prepare_ref_image(
@@ -20,7 +23,10 @@ def prepare_ref_image(
     return image.unsqueeze(0), original_size
 
 
-def prepare_deg_image(image_path: str, new_size: tuple[int, int]) -> torch.Tensor:
+def prepare_deg_image(
+    image_path: str,
+        new_size: tuple[int, int]
+) -> torch.Tensor:
     image = Image.open(image_path).convert("RGB")
     image = image.resize(new_size)
     if min(image.size) > 256:
@@ -30,7 +36,12 @@ def prepare_deg_image(image_path: str, new_size: tuple[int, int]) -> torch.Tenso
 
 
 class LoadProjectionsData:
-    def __init__(self, ref_base: str, deg_base: str, df_data: pd.DataFrame) -> None:
+    def __init__(
+            self,
+            ref_base: str,
+            deg_base: str,
+            df_data: pd.DataFrame
+    ) -> None:
         self.ref_base = ref_base
         self.deg_base = deg_base
         self.df_data = df_data
@@ -69,7 +80,9 @@ class LoadProjectionsData:
         for ref_ in refs_names:
             ref_name = ref_.replace(".ply", "")
             views_paths = self._gen_views_paths(ref_name, self.ref_base)
-            ref_images = [prepare_ref_image(view_path) for view_path in views_paths]
+            ref_images = [
+                prepare_ref_image(view_path) for view_path in views_paths
+            ]
             refs_projections_aux = [ref_image[0] for ref_image in ref_images]
             sizes = [ref_image[1] for ref_image in ref_images]
             projs = self._gen_projections_obj(ref_name, refs_projections_aux)
@@ -77,7 +90,8 @@ class LoadProjectionsData:
         return refs_projections
 
     def _get_pairs_projections(
-        self, refs_projections: Dict[str, tuple[PlyProjections, tuple[int, int]]]
+        self,
+        refs_projections: Dict[str, tuple[PlyProjections, tuple[int, int]]]
     ) -> List[PairProjections]:
         projections = []
         for _, row in tqdm(self.df_data.iterrows()):
@@ -94,7 +108,9 @@ class LoadProjectionsData:
 
             projs = self._gen_projections_obj(deg_name, degs_projections_aux)
             projs_pair = PairProjections(
-                ref=refs_projections[ref_name][0], deg=projs, score=row["SCORE"]
+                ref=refs_projections[ref_name][0],
+                deg=projs,
+                score=row["SCORE"]
             )
             projections.append(projs_pair)
         return projections
@@ -116,7 +132,9 @@ class LoadProjectionsData:
 
             projs = self._gen_projections_obj(deg_name, degs_projections_aux)
             projs_pair = PairProjections(
-                ref=refs_projections[ref_name][0], deg=projs, score=row["SCORE"]
+                ref=refs_projections[ref_name][0],
+                deg=projs,
+                score=row["SCORE"]
             )
             yield projs_pair
 
