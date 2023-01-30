@@ -4,6 +4,9 @@ tccVenv2/
 __pycache__/
 .ipynb_checkpoints/
 */.ipynb_checkpoints/
+cache/
+*.log
+*.out
 
 # OS Stuff
 .DS_Store
