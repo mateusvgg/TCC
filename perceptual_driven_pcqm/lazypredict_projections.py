@@ -15,23 +15,22 @@ memory = Memory(cache_dir, verbose=0)
 
 @memory.cache
 def load_and_preprocess_data(dataset: str) -> ModelData:
-    print("Loading data...")
+    print("Preprocessing data...")
     X = torch.load(f"data/X_tensor_{dataset}.pt")
     X = [[v.cpu().detach().numpy() for v in x] for x in X]
     y = torch.load(f"data/y_tensor_{dataset}.pt")
 
-    print("Preprocessing data...")
     X = np.array(X)
     y = np.array(y)
 
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.25, random_state=42
+        X, y, test_size=0.1, random_state=56
     )
 
     return X_train, X_test, y_train, y_test
 
 
-@memory.cache
+# @memory.cache
 def run_lazypredict(data: ModelData, dataset: str) -> tuple[pd.DataFrame, pd.DataFrame]:
     x_train, x_test, y_train, y_test = data
 
@@ -42,7 +41,7 @@ def run_lazypredict(data: ModelData, dataset: str) -> tuple[pd.DataFrame, pd.Dat
     return models, predictions
 
 
-@memory.cache
+# @memory.cache
 def save_results(models: pd.DataFrame, predictions: pd.DataFrame, dataset: str):
     print("Saving results...")
     models.to_markdown(f"results/lazypredict_{dataset}_projections.md")
